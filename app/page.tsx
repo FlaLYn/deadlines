@@ -1,10 +1,9 @@
 'use client';
 
 import { ChangeEvent, DragEvent, FormEvent, useEffect, useRef, useState } from 'react';
-import mammoth from 'mammoth';
 import {
   ArrowLeft, ArrowRight, BookOpen, CalendarDays, Check, CheckCircle2, ChevronRight,
-  Circle, Clock3, Edit3, FileText, FileUp, LayoutDashboard, ListTodo,
+  AlertTriangle, Circle, Clock3, Edit3, FileText, FileUp, LayoutDashboard, ListTodo,
   Plus, Search, Sparkles, Trash2, UploadCloud, X,
 } from 'lucide-react';
 
@@ -26,41 +25,7 @@ const sampleCourse: Course = {
 };
 
 const monthName: Record<string, string> = { '01':'JAN','02':'FEB','03':'MAR','04':'APR','05':'MAY','06':'JUN','07':'JUL','08':'AUG','09':'SEP','10':'OCT','11':'NOV','12':'DEC' };
-const monthNumber: Record<string, number> = { january:0, february:1, march:2, april:3, may:4, june:5, july:6, august:7, september:8, october:9, november:10, december:11 };
 const palette = ['#e66d52', '#7189c4', '#c5984f', '#719485', '#9d78a8'];
-
-function parseDate(month: string, day: string, year: number, time = '23:59') {
-  const monthIndex = monthNumber[month.toLowerCase()];
-  if (monthIndex === undefined) return null;
-  const [hours, minutes] = time.split(':').map(Number);
-  return new Date(year, monthIndex, Number(day), hours, minutes).toISOString();
-}
-
-function parseSyllabus(text: string, fileName: string): Course {
-  const clean = text.replace(/\r/g, '').replace(/[ \t]+/g, ' ').trim();
-  const lines = clean.split('\n').map((line) => line.trim()).filter(Boolean);
-  const year = Number(clean.match(/\b(Fall|Spring|Summer|Winter)\s+(20\d{2})\b/i)?.[2] ?? new Date().getFullYear());
-  const term = clean.match(/\b(Fall|Spring|Summer|Winter)\s+20\d{2}\b/i)?.[0] ?? `Academic year ${year}`;
-  const title = lines.find((line) => line.length > 8 && line.length < 100 && !/syllabus|fall|spring|professor/i.test(line)) ?? fileName.replace(/\.docx$/i, '');
-  const instructor = lines.slice(1, 8).find((line) => /^[A-Z][\p{L}.'-]+(?:\s+[A-Z][\p{L}.'-]+){1,3}$/u.test(line)) ?? 'Instructor not found';
-  const meeting = clean.match(/(Monday|Tuesday|Wednesday|Thursday|Friday)(?:\s*(?:and|&)\s*(?:Monday|Tuesday|Wednesday|Thursday|Friday))?[^\n]{0,30}?\b(\d{1,2}:\d{2})\b/i);
-  const meetingIndex = meeting ? lines.findIndex((line) => line.includes(meeting[0])) : -1;
-  const assignments: Assignment[] = [];
-  const paperPattern = /Paper\s*(?:No\.?\s*)?(\d)[\s\S]{0,420}?due\s+(\d{1,2})\s+(September|October|November|December|January|February|March|April|May|June|July|August)(?:\s+at\s+(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?))?/gi;
-  for (const match of clean.matchAll(paperPattern)) {
-    let hour = Number(match[4] ?? 23); const minute = Number(match[5] ?? 59);
-    if (/p/i.test(match[6] ?? '') && hour < 12) hour += 12;
-    if (/a/i.test(match[6] ?? '') && hour === 12) hour = 0;
-    const pages = match[0].match(/(?:up to\s+)?\d+\s+double-spaced pages|five double-spaced pages/i)?.[0];
-    assignments.push({ id:`paper-${match[1]}-${crypto.randomUUID()}`, title:`Paper No. ${match[1]}`, due:parseDate(match[3], match[2], year, `${hour}:${String(minute).padStart(2,'0')}`), kind:'paper', weight:10, details:pages ? `${pages} · Imported from syllabus` : 'Imported from syllabus', confidence:'high' });
-  }
-  const countText = clean.match(/total of\s+(three|four|five|\d+)\s+in-class quizzes/i)?.[1];
-  const quizCount = Number(countText?.replace('three','3').replace('four','4').replace('five','5') ?? 0);
-  const quizWeight = Number(clean.match(/quizzes?[\s\S]{0,180}?(\d+) percent each/i)?.[1] ?? 0);
-  for (let index=1; index<=quizCount; index+=1) assignments.push({ id:`quiz-${index}-${crypto.randomUUID()}`, title:`In-class quiz / précis ${index}`, due:null, kind:'quiz', weight:quizWeight||undefined, details:'Date to be set by instructor', confidence:'review' });
-  if (!assignments.length) assignments.push({ id:`review-${crypto.randomUUID()}`, title:'Review imported syllabus', due:null, kind:'class', details:'No clearly dated assignments were found', confidence:'review' });
-  return { id:`course-${crypto.randomUUID()}`, title, shortTitle:title.split(/[:—-]/)[0].slice(0,34), term, instructor, schedule:meeting?.[0] ?? 'Schedule not found', location:meetingIndex >= 0 && lines[meetingIndex+1]?.length < 70 ? lines[meetingIndex+1] : 'Location not found', assignments };
-}
 
 function dateParts(value: string | null) {
   if (!value) return { day:'—', month:'TBD', full:'Date to be announced' };
@@ -101,6 +66,8 @@ export default function Home() {
   const [calendarCourse, setCalendarCourse] = useState('all');
   const [calendarMonth, setCalendarMonth] = useState(()=>new Date(new Date().getFullYear(),new Date().getMonth(),1));
   const [draft, setDraft] = useState<Course|null>(null);
+  const [importWarnings, setImportWarnings] = useState<string[]>([]);
+  const [importSource, setImportSource] = useState('');
   const [modal, setModal] = useState<Modal>(null);
   const [editing, setEditing] = useState<{courseId:string; assignment:Assignment}|null>(null);
   const [assignmentDefaultDue, setAssignmentDefaultDue] = useState('');
@@ -110,15 +77,18 @@ export default function Home() {
   const [toast, setToast] = useState('');
 
   useEffect(() => {
-    try {
-      const multi = localStorage.getItem('courseflow-courses');
-      const legacy = localStorage.getItem('courseflow-course');
-      const loaded: Course[] = multi ? JSON.parse(multi) : legacy ? [JSON.parse(legacy)] : [sampleCourse];
-      setCourses(loaded);
-      const storedActive = localStorage.getItem('courseflow-active-course');
-      setActiveId(loaded.some((course)=>course.id===storedActive) ? String(storedActive) : loaded[0]?.id ?? '');
-      if (!multi) localStorage.setItem('courseflow-courses', JSON.stringify(loaded));
-    } catch { setCourses([sampleCourse]); }
+    const timer = window.setTimeout(() => {
+      try {
+        const multi = localStorage.getItem('courseflow-courses');
+        const legacy = localStorage.getItem('courseflow-course');
+        const loaded: Course[] = multi ? JSON.parse(multi) : legacy ? [JSON.parse(legacy)] : [sampleCourse];
+        setCourses(loaded);
+        const storedActive = localStorage.getItem('courseflow-active-course');
+        setActiveId(loaded.some((course)=>course.id===storedActive) ? String(storedActive) : loaded[0]?.id ?? '');
+        if (!multi) localStorage.setItem('courseflow-courses', JSON.stringify(loaded));
+      } catch { setCourses([sampleCourse]); }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const activeCourse = courses.find((item)=>item.id===activeId) ?? courses[0] ?? null;
@@ -131,15 +101,37 @@ export default function Home() {
 
   async function readFile(file?:File) {
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith('.docx')) { notify('Please choose a .docx syllabus.'); return; }
+    const supported = ['.pdf','.docx','.txt','.md','.rtf','.odt','.ppt','.pptx'];
+    const extension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+    if (!supported.includes(extension)) { notify('Choose a PDF, DOCX, TXT, Markdown, RTF, ODT, or PowerPoint syllabus.'); return; }
+    if (file.size > 20 * 1024 * 1024) { notify('Please choose a syllabus smaller than 20 MB.'); return; }
     setParsing(true);
-    try { const result=await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()}); setDraft(parseSyllabus(result.value,file.name)); setModal('review'); }
-    catch { notify('That document could not be read. Try another .docx file.'); }
+    setImportWarnings([]);
+    try {
+      const body = new FormData();
+      body.append('file', file);
+      if (extension === '.docx') {
+        const mammoth = await import('mammoth');
+        const extracted = await mammoth.extractRawText({ arrayBuffer:await file.arrayBuffer() });
+        if (!extracted.value.trim()) throw new Error('No readable text was found in this Word document.');
+        body.append('extractedText', extracted.value);
+      } else if (['.txt','.md','.rtf'].includes(extension)) {
+        body.append('extractedText', await file.text());
+      }
+      const response = await fetch('/api/extract-course', { method:'POST', body });
+      const result = await response.json() as { course?:Course; warnings?:string[]; sourceName?:string; error?:string };
+      if (!response.ok || !result.course) throw new Error(result.error || 'Gemini could not read this syllabus.');
+      setDraft(result.course);
+      setImportWarnings(result.warnings ?? []);
+      setImportSource(result.sourceName ?? file.name);
+      setModal('review');
+    }
+    catch (error) { notify(error instanceof Error ? error.message : 'That document could not be analyzed.'); }
     finally { setParsing(false); }
   }
   function onInput(event:ChangeEvent<HTMLInputElement>) { readFile(event.target.files?.[0]); event.target.value=''; }
   function onDrop(event:DragEvent<HTMLDivElement>) { event.preventDefault(); setDragging(false); readFile(event.dataTransfer.files?.[0]); }
-  function confirmImport() { if (!draft) return; save([...courses,draft],draft.id); setCalendarCourse(draft.id); setModal(null); setView('course'); notify(`${draft.assignments.length} items added to ${draft.shortTitle}.`); }
+  function confirmImport() { if (!draft) return; save([...courses,draft],draft.id); setCalendarCourse(draft.id); setModal(null); setView('course'); notify(`${draft.assignments.length} items added to ${draft.shortTitle}.`); setDraft(null); setImportWarnings([]); setImportSource(''); }
   function toggleDone(courseId:string,id:string) { updateCourse(courseId,(course)=>({...course,assignments:course.assignments.map((item)=>item.id===id?{...item,completed:!item.completed}:item)})); }
   function openAssignment(courseId=activeCourse?.id ?? '',due?:string) { setEditing(null); setAssignmentDefaultDue(inputDate(due??null)); setActiveId(courseId || activeId); setModal('assignment'); }
   function editAssignment(courseId:string,assignment:Assignment) { setEditing({courseId,assignment}); setAssignmentDefaultDue(''); setModal('assignment'); }
@@ -176,9 +168,9 @@ export default function Home() {
       </>}
     </section>
 
-    {modal&&<div className="modal-backdrop" role="presentation" onMouseDown={()=>!parsing&&setModal(null)}><section className={`import-modal ${modal==='assignment'?'assignment-modal':''}`} role="dialog" aria-modal="true" aria-labelledby="import-title" onMouseDown={(event)=>event.stopPropagation()}><button className="modal-close" onClick={()=>setModal(null)} aria-label="Close"><X size={19}/></button>
-      {modal==='upload'&&<><span className="modal-icon"><Sparkles size={20}/></span><p className="modal-step">NEW COURSE</p><h2 id="import-title">Turn a syllabus into a plan.</h2><p className="modal-intro">Upload a Word document and Courseflow will add it as a new course without changing your existing classes.</p><div className={`dropzone ${dragging?'dragging':''}`} onDragOver={(event)=>{event.preventDefault();setDragging(true)}} onDragLeave={()=>setDragging(false)} onDrop={onDrop} onClick={()=>inputRef.current?.click()}><input ref={inputRef} type="file" accept=".docx" onChange={onInput}/>{parsing?<><span className="loader"/><strong>Reading your syllabus…</strong><small>Finding dates and assignments</small></>:<><UploadCloud size={30}/><strong>Drop your syllabus here</strong><small>or click to browse · DOCX up to 10 MB</small></>}</div><div className="privacy-note"><CheckCircle2 size={16}/><span><b>Your document stays private.</b> It is read in your browser.</span></div></>}
-      {modal==='review'&&draft&&<><span className="modal-icon success"><Check size={20}/></span><p className="modal-step">READY TO IMPORT</p><h2 id="import-title">We found your course.</h2><p className="modal-intro">This will be added alongside your other classes.</p><div className="review-course"><div><small>COURSE</small><strong>{draft.title}</strong></div><div><small>TERM</small><strong>{draft.term}</strong></div><div><small>INSTRUCTOR</small><strong>{draft.instructor}</strong></div><div><small>SCHEDULE</small><strong>{draft.schedule}</strong></div></div><div className="found-row"><span><FileText size={18}/><b>{draft.assignments.length}</b> items found</span><span><Clock3 size={18}/><b>{draft.assignments.filter((item)=>item.due).length}</b> dated</span><span><Circle size={18}/><b>{draft.assignments.filter((item)=>!item.due).length}</b> to review</span></div><div className="modal-actions"><button className="secondary-button" onClick={()=>setModal('upload')}>Choose another</button><button className="import-button" onClick={confirmImport}>Add course <ChevronRight size={17}/></button></div></>}
+    {modal&&<div className="modal-backdrop" role="presentation" onMouseDown={()=>!parsing&&setModal(null)}><section className={`import-modal ${modal==='assignment'?'assignment-modal':''} ${modal==='review'?'review-modal':''}`} role="dialog" aria-modal="true" aria-labelledby="import-title" onMouseDown={(event)=>event.stopPropagation()}><button className="modal-close" disabled={parsing} onClick={()=>setModal(null)} aria-label="Close"><X size={19}/></button>
+      {modal==='upload'&&<><span className="modal-icon"><Sparkles size={20}/></span><p className="modal-step">AI COURSE IMPORT</p><h2 id="import-title">Turn any syllabus into a plan.</h2><p className="modal-intro">Gemini reads the whole document, understands prose and tables, then creates an editable course with assignments and dates.</p><div className={`dropzone ${dragging?'dragging':''}`} onDragOver={(event)=>{event.preventDefault();setDragging(true)}} onDragLeave={()=>setDragging(false)} onDrop={onDrop} onClick={()=>!parsing&&inputRef.current?.click()}><input ref={inputRef} type="file" accept=".pdf,.docx,.txt,.md,.rtf,.odt,.ppt,.pptx" onChange={onInput}/>{parsing?<><span className="loader"/><strong>Gemini is analyzing your syllabus…</strong><small>Reading every page, table, date, and grading rule</small></>:<><UploadCloud size={30}/><strong>Drop your syllabus here</strong><small>PDF, DOCX, TXT, MD, RTF, ODT, or PPTX · up to 20 MB</small></>}</div><div className="privacy-note"><CheckCircle2 size={16}/><span><b>Your API key stays private.</b> The file is sent securely from Courseflow’s server to Gemini for analysis.</span></div></>}
+      {modal==='review'&&draft&&<><span className="modal-icon success"><Check size={20}/></span><p className="modal-step">AI IMPORT READY</p><h2 id="import-title">Review what Gemini found.</h2><p className="modal-intro">Nothing is added until you confirm. You can edit or remove every item after import.</p><div className="source-pill"><Sparkles size={14}/><span>{importSource}</span><b>Gemini analyzed</b></div><div className="review-course"><div><small>COURSE</small><strong>{draft.title}</strong></div><div><small>TERM</small><strong>{draft.term}</strong></div><div><small>INSTRUCTOR</small><strong>{draft.instructor}</strong></div><div><small>SCHEDULE</small><strong>{draft.schedule}</strong></div></div><div className="found-row"><span><FileText size={18}/><b>{draft.assignments.length}</b> items found</span><span><Clock3 size={18}/><b>{draft.assignments.filter((item)=>item.due).length}</b> dated</span><span><Circle size={18}/><b>{draft.assignments.filter((item)=>item.confidence==='review').length}</b> to review</span></div>{importWarnings.length>0&&<div className="import-warnings"><div><AlertTriangle size={16}/><b>Check these details</b></div>{importWarnings.map((warning)=><p key={warning}>{warning}</p>)}</div>}<div className="import-preview"><div className="preview-heading"><b>Assignments</b><span>{draft.assignments.length} detected</span></div>{draft.assignments.map((assignment)=>{const due=dateParts(assignment.due);return <article key={assignment.id}><span className={`preview-status ${assignment.confidence==='review'?'review':''}`}>{assignment.confidence==='review'?'REVIEW':'READY'}</span><div><b>{assignment.title}</b><small>{assignment.details}</small></div><time>{assignment.due?`${due.month} ${due.day}`:'DATE TBD'}</time></article>})}{!draft.assignments.length&&<p className="preview-empty">No graded work was found. You can still add the course and enter assignments manually.</p>}</div><div className="modal-actions"><button className="secondary-button" onClick={()=>setModal('upload')}>Choose another</button><button className="import-button" onClick={confirmImport}>Add course <ChevronRight size={17}/></button></div></>}
       {modal==='assignment'&&<><span className="modal-icon"><ListTodo size={20}/></span><p className="modal-step">{editing?'EDIT ASSIGNMENT':'NEW ASSIGNMENT'}</p><h2 id="import-title">{editing?'Update the details.':'Add something to your plan.'}</h2><form className="assignment-form" onSubmit={saveAssignment}><label><span>Course</span><select name="courseId" defaultValue={editing?.courseId??activeCourse?.id} required>{courses.map((course)=><option value={course.id} key={course.id}>{course.shortTitle}</option>)}</select></label><label className="full"><span>Assignment title</span><input name="title" defaultValue={editing?.assignment.title??''} placeholder="e.g. Midterm paper" required autoFocus/></label><label><span>Due date & time</span><input name="due" type="datetime-local" defaultValue={editing?inputDate(editing.assignment.due):assignmentDefaultDue}/></label><label><span>Type</span><select name="kind" defaultValue={editing?.assignment.kind??'paper'}><option value="paper">Paper / project</option><option value="quiz">Quiz / exam</option><option value="reading">Reading</option><option value="class">Class task</option></select></label><label><span>Grade weight (%)</span><input name="weight" type="number" min="0" max="100" step="0.5" defaultValue={editing?.assignment.weight??''} placeholder="Optional"/></label><label className="full"><span>Details</span><textarea name="details" defaultValue={editing?.assignment.details??''} placeholder="Pages, topic, instructions, or notes" rows={3}/></label><div className="modal-actions full"><button type="button" className="secondary-button" onClick={()=>setModal(null)}>Cancel</button><button className="import-button" type="submit">{editing?'Save changes':'Add assignment'}</button></div></form></>}
       {modal==='delete-course'&&activeCourse&&<div className="confirm-modal"><span className="modal-icon danger"><Trash2 size={20}/></span><p className="modal-step">REMOVE COURSE</p><h2 id="import-title">Remove {activeCourse.shortTitle}?</h2><p className="modal-intro">This removes the course and its {activeCourse.assignments.length} assignments from this device. This can’t be undone.</p><div className="modal-actions"><button className="secondary-button" onClick={()=>setModal(null)}>Keep course</button><button className="danger-button" onClick={deleteCourse}>Remove course</button></div></div>}
       {modal==='delete-assignment'&&pendingDelete&&<div className="confirm-modal"><span className="modal-icon danger"><Trash2 size={20}/></span><p className="modal-step">DELETE ASSIGNMENT</p><h2 id="import-title">Delete “{pendingDelete.assignment.title}”?</h2><p className="modal-intro">It will be removed from {courses.find((course)=>course.id===pendingDelete.courseId)?.shortTitle}. This can’t be undone.</p><div className="modal-actions"><button className="secondary-button" onClick={()=>setModal(null)}>Cancel</button><button className="danger-button" onClick={deleteAssignment}>Delete assignment</button></div></div>}
