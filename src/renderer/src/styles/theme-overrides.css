@@ -1,0 +1,87 @@
+/* Hand-tuned dark values, loaded after the generated theme.css.
+   Straight lightness inversion gets surfaces wrong in one specific way: in light mode
+   depth reads as *whiter* (white cards on a warm grey ground), but inverting that makes
+   every surface collapse onto the same near-black. In dark mode depth reads as *lighter*,
+   so the elevation ladder has to be rebuilt by hand rather than flipped. */
+
+/* Calendar pills tint a course colour into a surface. The surface has to follow the
+   theme, and the tint has to be stronger on a dark ground to stay distinguishable. */
+:root {
+  --event-surface: var(--c-ffffff);
+  --event-tint: 13%;
+  --event-tint-hover: 22%;
+}
+
+:root[data-theme='dark'] {
+  --event-tint: 30%;
+  --event-tint-hover: 45%;
+}
+
+:root[data-theme='dark'] {
+  /* Elevation ladder, darkest ground to highest surface. */
+  --c-f3f4ef: #161713; /* page ground */
+  --c-eef0ea: #131412; /* sidebar, recessed below the page */
+  --c-ffffff: #212319; /* cards, modals, inputs — the primary raised surface */
+  --c-fbfbf8: #1e201a;
+  --c-fbfcf8: #1e201a;
+  --c-fafbf7: #1e201a;
+  --c-f8f9f5: #1c1e19;
+  --c-f7f8f4: #1c1e19;
+  --c-f2f4ee: #1a1c17;
+  --c-f1f3ed: #1a1c17;
+  --c-e9ece5: #242720;
+  --c-eef2ea: #1f2b22;
+
+  /* Hairlines need more contrast than an inversion gives them. */
+  --c-dfe3da: #33362c;
+  --c-dce1d8: #33362c;
+  --c-e0e4db: #383c31;
+  --c-d9ded5: #3d4136;
+  --c-d8ddd3: #3d4136;
+  --c-d5dbd2: #3d4136;
+  --c-e1e5dd: #2c2f27;
+  --c-e3e7de: #2c2f27;
+  --c-e8ebe4: #2c2f27;
+  --c-d8dfd7: #383c31;
+
+  /* Text: keep the primary bright, and lift the muted greys clear of the ground. */
+  --c-13272a: #e7eae6;
+  --c-183437: #eef1ec;
+  --c-75827d: #9aa39d;
+  --c-8b9692: #929b96;
+  --c-8b9591: #929b96;
+  --c-89938f: #929b96;
+  --c-8c9692: #929b96;
+  --c-86908c: #8d9691;
+  --c-8b9692: #949d97;
+  --c-7c8984: #a2aba5;
+  --c-7c8783: #a2aba5;
+  --c-7d8884: #a2aba5;
+  --c-52615c: #b3bcb6;
+  --c-5f6d68: #b3bcb6;
+  --c-65726e: #a7b0aa;
+  --c-63706b: #a7b0aa;
+  --c-8b9591: #939c96;
+
+  /* Status tints: dark, desaturated grounds so the coloured text stays readable. */
+  --c-fdecec: #2e1c1a;
+  --c-f4cfcb: #4d2f2a;
+  --c-8c332a: #f0a79c;
+  --c-fdf3e8: #2c2318;
+  --c-f0dcc0: #4a3c26;
+  --c-8a5a24: #e2b277;
+  --c-b3803a: #d9a55f;
+  --c-5c8a6a: #79ad88;
+  --c-fdf3e8: #2c2318;
+}
+
+/* The window's own ground, painted before React mounts. */
+:root[data-theme='dark'] body,
+:root[data-theme='dark'] html {
+  background: var(--c-f3f4ef);
+}
+
+/* Form controls and scrollbars follow the theme instead of staying light. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}

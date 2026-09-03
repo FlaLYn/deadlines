@@ -1,0 +1,41 @@
+If macOS says "DeadLines is damaged and can't be opened"
+========================================================
+
+The app is not damaged. macOS tags anything downloaded from the internet, and
+because DeadLines is not signed with a paid Apple Developer certificate yet,
+that tag makes it refuse to launch.
+
+Two ways to fix it. Either one only has to be done once.
+
+
+OPTION 1 — System Settings (no Terminal)
+----------------------------------------
+1. Drag DeadLines to your Applications folder, then try to open it.
+2. When the error appears, click OK.
+3. Open  System Settings > Privacy & Security
+4. Scroll down. There will be a line about DeadLines being blocked.
+5. Click "Open Anyway", then confirm.
+
+Note: on macOS 15 and newer, right-clicking the app and choosing "Open"
+no longer works. It has to be done from System Settings.
+
+
+OPTION 2 — Terminal (one command)
+---------------------------------
+1. Drag DeadLines to your Applications folder.
+2. Open the Terminal app.
+3. Paste this line exactly and press Return:
+
+     xattr -cr /Applications/DeadLines.app
+
+4. Open DeadLines normally.
+
+That command removes the "downloaded from the internet" tag. It changes
+nothing else, and no password is needed.
+
+
+Why this happens
+----------------
+Removing this step entirely requires an Apple Developer account, which lets
+the app be signed and notarized by Apple. Until then, macOS treats it the way
+it treats any unidentified app.

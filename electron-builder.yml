@@ -1,0 +1,58 @@
+appId: com.deadlines.app
+# Where the app looks for new versions.
+publish:
+  provider: github
+  owner: FlaLYn
+  repo: deadlines
+productName: DeadLines
+copyright: Copyright © 2026 Rojus Pauza
+directories:
+  buildResources: build
+  output: release
+files:
+  - out/**
+  - package.json
+  - '!**/{.eslintrc,.editorconfig,.prettierrc,tsconfig*.json}'
+asarUnpack:
+  - resources/**
+mac:
+  category: public.app-category.education
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  # Unsigned builds are fine for personal use; add an identity to distribute.
+  identity: null
+  darkModeSupport: false
+  extendInfo:
+    NSHumanReadableCopyright: Copyright © 2026 Rojus Pauza
+dmg:
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  window:
+    width: 620
+    height: 400
+  # A DMG cannot run a script on mount, so the Gatekeeper workaround has to be
+  # something the user reads and does. Drop the instructions in the window itself.
+  contents:
+    - x: 150
+      y: 180
+      type: file
+    - x: 470
+      y: 180
+      type: link
+      path: /Applications
+    - x: 310
+      y: 320
+      type: file
+      path: build/If DeadLines won't open.txt
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+linux:
+  target: [AppImage]
+  category: Education
+  maintainer: rojuspauza@gmail.com
