@@ -1,6 +1,6 @@
 {
   "name": "deadlines",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Turn any syllabus into an organized course plan — on your desktop.",
   "main": "./out/main/index.js",
   "author": "Rojus Pauza",
