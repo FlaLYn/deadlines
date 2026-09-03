@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DeadLines — turn any syllabus into a plan</title>
+<meta name="description" content="DeadLines is a free desktop app for students. Import a course syllabus and it builds an editable course plan with every deadline, using Google's Gemini API.">
+<style>
+  :root{--ink:#13272a;--muted:#5f6d68;--paper:#f3f4ef;--card:#fff;--line:#dfe3da;--coral:#e66d52}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  .wrap{max-width:52rem;margin:0 auto;padding:0 24px}
+  header{padding:60px 0 40px;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:750;font-size:18px;letter-spacing:-.02em}
+  .mark{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:var(--ink);color:#fff;font-family:Georgia,serif}
+  h1{font-family:Georgia,serif;font-weight:500;font-size:clamp(32px,5vw,46px);line-height:1.1;letter-spacing:-.03em;margin:34px 0 14px}
+  .lede{font-size:18px;color:var(--muted);max-width:38ch;margin:0}
+  h2{font-family:Georgia,serif;font-weight:500;font-size:26px;letter-spacing:-.02em;margin:44px 0 12px}
+  h3{font-size:15px;margin:0 0 5px}
+  section{padding:8px 0 4px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:16px;margin-top:22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+  .card p{margin:0;color:var(--muted);font-size:14px}
+  ol{padding-left:20px;color:var(--muted)} ol li{margin-bottom:10px} ol b{color:var(--ink)}
+  .cta{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;text-decoration:none;
+       padding:13px 22px;border-radius:11px;font-weight:600;font-size:15px;margin-top:26px}
+  .note{background:#fdf3e8;border:1px solid #f0dcc0;color:#8a5a24;border-radius:12px;padding:14px 17px;font-size:14px;margin-top:22px}
+  footer{margin-top:56px;padding:26px 0 60px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+  footer a{color:var(--coral)}
+  @media(prefers-color-scheme:dark){
+    :root{--ink:#e7eae6;--muted:#9aa39d;--paper:#161713;--card:#212319;--line:#33362c}
+    .mark{background:#e7eae6;color:#161713}
+    .cta{background:#e7eae6;color:#161713}
+    .note{background:#2c2318;border-color:#4a3c26;color:#e2b277}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand"><span class="mark">D</span><span>DeadLines</span></div>
+  <h1>Turn any syllabus into a plan.</h1>
+  <p class="lede">A free desktop app for students. Drop in a course syllabus and get an editable plan with every deadline in it.</p>
+  <a class="cta" href="https://github.com/FlaLYn/deadlines/releases/latest">Download for macOS</a>
+</header>
+
+<section>
+  <h2>What it does</h2>
+  <div class="grid">
+    <div class="card"><h3>Reads your syllabus</h3><p>Point it at a PDF or Word syllabus. Google's Gemini reads the prose, the tables and the course calendar, and builds a course with every graded item it can find.</p></div>
+    <div class="card"><h3>One calendar for everything</h3><p>Every deadline across every course in a single month view, colour-coded per course, with items that need checking flagged.</p></div>
+    <div class="card"><h3>Shows its working</h3><p>The imported items appear beside the original document, so you can check what it found against the source before anything is added.</p></div>
+    <div class="card"><h3>Stays on your machine</h3><p>There is no DeadLines server. Your courses and your API key live in your computer's application data folder, and nothing is sent to us — because there is no "us" to send it to.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Getting started</h2>
+  <ol>
+    <li><b>Download and open the app.</b> It is not yet notarised by Apple, so macOS asks you to confirm the first launch. The disk image explains how.</li>
+    <li><b>Sign in with Google.</b> Used to identify your workspace, and — if you allow it — to show your existing calendar events alongside your coursework.</li>
+    <li><b>Add a Gemini API key.</b> Free to create at <a href="https://aistudio.google.com/apikey">Google AI Studio</a>. Reading syllabi is billed to your own Google account, not to anyone else's.</li>
+    <li><b>Import a syllabus</b> and review what it found.</li>
+  </ol>
+  <div class="note">DeadLines is an independent project, not affiliated with or endorsed by Google, or by any school or university.</div>
+</section>
+
+<footer>
+  <p><a href="privacy.html">Privacy policy</a> &nbsp;·&nbsp; <a href="https://github.com/FlaLYn/deadlines">Source code</a> &nbsp;·&nbsp; <a href="https://github.com/FlaLYn/deadlines/issues">Report an issue</a></p>
+  <p>Contact: <a href="mailto:rojuspauza@gmail.com">rojuspauza@gmail.com</a></p>
+</footer>
+
+</div>
+</body>
+</html>

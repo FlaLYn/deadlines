@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy Policy — DeadLines</title>
+<meta name="description" content="How the DeadLines desktop app handles your Google account information, Google Calendar data, syllabus files and API keys.">
+<style>
+  :root{--ink:#13272a;--muted:#5f6d68;--paper:#f3f4ef;--card:#fff;--line:#dfe3da;--coral:#e66d52}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  .wrap{max-width:46rem;margin:0 auto;padding:0 24px}
+  header{padding:52px 0 26px;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:750;font-size:17px;letter-spacing:-.02em;text-decoration:none;color:inherit}
+  .mark{width:32px;height:32px;display:grid;place-items:center;border-radius:9px;background:var(--ink);color:#fff;font-family:Georgia,serif}
+  h1{font-family:Georgia,serif;font-weight:500;font-size:38px;letter-spacing:-.03em;margin:28px 0 8px}
+  .updated{color:var(--muted);font-size:14px;margin:0}
+  h2{font-family:Georgia,serif;font-weight:500;font-size:23px;letter-spacing:-.02em;margin:40px 0 10px}
+  h3{font-size:15px;margin:24px 0 4px}
+  p,li{color:var(--muted)} p{margin:0 0 13px}
+  ul{padding-left:20px} li{margin-bottom:8px}
+  b,strong{color:var(--ink)}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top;color:var(--muted)}
+  th{background:var(--card);color:var(--ink);font-size:13px}
+  .callout{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--coral);
+           border-radius:10px;padding:16px 19px;margin:20px 0}
+  .callout p:last-child{margin:0}
+  a{color:var(--coral)}
+  footer{margin-top:50px;padding:24px 0 60px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+  @media(prefers-color-scheme:dark){
+    :root{--ink:#e7eae6;--muted:#9aa39d;--paper:#161713;--card:#212319;--line:#33362c}
+    .mark{background:#e7eae6;color:#161713}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <a class="brand" href="index.html"><span class="mark">D</span><span>DeadLines</span></a>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated 3 September 2026</p>
+</header>
+
+<p>DeadLines is a desktop application that turns a course syllabus into an organised plan of
+assignments and deadlines. It is developed and maintained by Rojus Pauza as an independent,
+non-commercial project.</p>
+
+<div class="callout">
+  <p><strong>The short version.</strong> DeadLines has no servers. Nothing you do in the app is
+  sent to the developer, because there is nowhere to send it. Your courses, your Google profile
+  and your API key are stored only in your own computer's application data folder. The only
+  network requests the app makes are to Google, on your behalf: to sign you in, to read your
+  calendar if you enable it, and to send a syllabus to the Gemini API for analysis using an API
+  key that you supply.</p>
+</div>
+
+<h2>1. Who is responsible</h2>
+<p>Rojus Pauza. Contact: <a href="mailto:rojuspauza@gmail.com">rojuspauza@gmail.com</a>.
+DeadLines is not affiliated with, endorsed by, or sponsored by Google, or by any educational
+institution.</p>
+
+<h2>2. What the app accesses, and why</h2>
+<p>DeadLines requests the following access from your Google Account. Each is used only for the
+purpose described.</p>
+
+<table>
+  <tr><th>Permission</th><th>What it gives access to</th><th>Why the app needs it</th></tr>
+  <tr>
+    <td><code>openid</code>, <code>email</code>, <code>profile</code></td>
+    <td>Your Google account identifier, email address, display name and profile picture URL.</td>
+    <td>To identify which local workspace to open, so that two people sharing a computer keep
+        separate courses, and to show who is signed in.</td>
+  </tr>
+  <tr>
+    <td><code>calendar.readonly</code></td>
+    <td>Read-only access to your Google Calendar entries: titles, dates, times, locations and
+        the names of your calendars.</td>
+    <td>To display your existing commitments in the same month view as your coursework, so
+        deadlines can be seen in the context of the rest of your schedule. This permission is
+        optional and can be turned off in the app.</td>
+  </tr>
+</table>
+
+<p><strong>DeadLines never requests write access to your calendar.</strong> It cannot create,
+change or delete any event in your Google Account.</p>
+
+<h2>3. Where your information is stored</h2>
+<p>All application data is stored locally on your own device, in the operating system's standard
+application-data location for DeadLines. Nothing is uploaded to any server operated by the
+developer, because no such server exists.</p>
+<ul>
+  <li><b>Your Google profile</b> (account identifier, email, name, picture URL) is written to a
+      local file so the app can restore your session and label your workspace.</li>
+  <li><b>Your Google sign-in token</b> is encrypted using your operating system's secure
+      credential storage — Keychain on macOS, DPAPI on Windows, libsecret on Linux — before
+      being written to disk.</li>
+  <li><b>Your Gemini API key</b> is encrypted the same way. It is never displayed back to you in
+      full; the app shows only a short masked hint so you can recognise it.</li>
+  <li><b>Your courses and assignments</b> are stored as plain files on your device, in a separate
+      folder for each Google account that signs in.</li>
+  <li><b>Google Calendar events are never written to disk.</b> They are fetched when you view a
+      month, held in memory while the app is open, and discarded when it closes.</li>
+</ul>
+
+<h2>4. Information sent to third parties</h2>
+<p>The developer receives nothing. The app communicates only with Google, and only as a direct
+result of an action you take:</p>
+<ul>
+  <li><b>Google Sign-In</b> — signing in exchanges credentials directly with Google's
+      authentication servers.</li>
+  <li><b>Google Calendar API</b> — if you enable the calendar overlay, the app requests your
+      events directly from Google and displays them.</li>
+  <li><b>Google Gemini API</b> — when you import a syllabus, the text of that document is sent to
+      the Gemini API for analysis, authenticated with the API key <em>you</em> provide. Google's
+      handling of that content is governed by the terms applicable to your own Google account and
+      API key, not by any account of the developer's.</li>
+</ul>
+<p>DeadLines contains no analytics, no telemetry, no advertising and no third-party trackers of
+any kind. Your information is never sold, rented or shared with anyone.</p>
+
+<h2>5. Limited Use disclosure</h2>
+<div class="callout">
+  <p>DeadLines's use and transfer of information received from Google APIs to any other app will
+  adhere to the
+  <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services
+  User Data Policy</a>, including the Limited Use requirements.</p>
+  <p>Specifically: data obtained through Google APIs is used only to provide and improve the
+  features described above; it is not transferred to others except as necessary to provide those
+  features; it is not used for advertising; and no humans read it, except where required by law
+  or where you have given explicit consent.</p>
+</div>
+
+<h2>6. Keeping and deleting your information</h2>
+<p>Your data stays on your device until you remove it. You are always in control:</p>
+<ul>
+  <li><b>Sign out</b> from within the app clears the local session and asks Google to revoke the
+      token the app holds.</li>
+  <li><b>Delete local data</b>, in the app's Settings, permanently removes that account's courses,
+      assignments, stored profile and saved API key from your computer.</li>
+  <li><b>Revoke access entirely</b> at any time from your
+      <a href="https://myaccount.google.com/permissions">Google Account permissions page</a>,
+      independently of the app.</li>
+  <li><b>Uninstalling</b> the app and deleting its application-data folder removes everything.</li>
+</ul>
+
+<h2>7. Security</h2>
+<p>Credentials are encrypted at rest using your operating system's secure credential storage. All
+network communication with Google uses HTTPS. Sign-in uses the OAuth 2.0 authorization code flow
+with PKCE, the flow recommended for installed applications, and your Google password is never seen
+by or entered into the app — you enter it on Google's own sign-in page in your browser.</p>
+<p>No method of storage or transmission is perfectly secure, and because your data is held on your
+own device, its safety also depends on the security of that device.</p>
+
+<h2>8. Children</h2>
+<p>DeadLines is intended for students in higher and secondary education and is not directed at
+children under 13. The developer does not knowingly collect information from children under 13 —
+and, as described above, does not collect user information at all.</p>
+
+<h2>9. Changes to this policy</h2>
+<p>If this policy changes, the revised version will be published on this page with an updated date
+above. Material changes affecting how information is handled will also be noted in the release
+notes for the version that introduces them.</p>
+
+<h2>10. Contact</h2>
+<p>Questions about this policy or about how DeadLines handles information:
+<a href="mailto:rojuspauza@gmail.com">rojuspauza@gmail.com</a>, or open an issue on the
+<a href="https://github.com/FlaLYn/deadlines/issues">project's issue tracker</a>.</p>
+
+<footer>
+  <p><a href="index.html">DeadLines home</a> &nbsp;·&nbsp; <a href="https://github.com/FlaLYn/deadlines">Source code</a></p>
+</footer>
+
+</div>
+</body>
+</html>
