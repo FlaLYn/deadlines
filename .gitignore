@@ -3,6 +3,11 @@ out/
 release/
 dist/
 
+# `asar extract-file` writes its output into the working directory, which lands a
+# built bundle here with build-time credentials inlined. There is no source file at
+# the repo root, so ignoring it outright is safe.
+/index.js
+
 # Local secrets: the Google client ID/secret and any dev overrides.
 .env
 .env.*

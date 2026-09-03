@@ -14,13 +14,6 @@
 .course-title-copy { min-width:0; flex:1; }
 .course-actions { display:flex; gap:7px; align-items:center; }
 .danger-outline { border:1px solid var(--c-e5c8c0); border-radius:10px; background:var(--c-fff8f6); color:var(--c-ad513f); display:flex; align-items:center; gap:7px; padding:11px 13px; font-size:11px; font-weight:650; }
-.tool-callout { display:grid; grid-template-columns:26px 1fr; gap:10px; padding:15px 0; border-bottom:1px solid var(--c-d1d7cc); color:var(--c-60736c); }
-.tool-callout:first-of-type { margin-top:17px; }
-.tool-callout:last-child { border:0; }
-.tool-callout > div { display:flex; flex-direction:column; gap:4px; }
-.tool-callout b { font-size:11px; color:var(--c-364b45); }
-.tool-callout span { font-size:10px; line-height:1.45; color:var(--c-7c8984); }
-.tool-callout.danger svg { color:var(--c-bd5c48); }
 .manage-list { border-top:1px solid var(--c-dce1d8); }
 .manage-list article { display:grid; grid-template-columns:21px 50px 1fr auto; gap:15px; align-items:center; min-height:87px; border-bottom:1px solid var(--c-dce1d8); }
 .manage-list h4 { margin:0 0 4px; font-size:13px; }
